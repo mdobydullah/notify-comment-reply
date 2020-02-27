@@ -16,13 +16,17 @@ The plugin notifies the comment author via email when someone replies to his/her
 * Comment reply notification
 * Re-notify option
 * Notify on comment modification
-* Custom email template
-
-👉 See Official GitHub page: [GitHub](https://github.com/mdobydullah/notify-comment-reply)
+* Custom email templates
 
 == Customize email templates
 
 You're able to customize reply, re-notify and modification email templates. Copy the plugin's "templates" folder to your theme folder & set your own design. The plugin will look for templates on the "/wp-content/themes/[THEME_DIR]/templates/" folder. If you want to use default templates, then you don't need to do this thing.
+
+== Others
+
+1. Check [GitHub](https://github.com/mdobydullah/notify-comment-reply) repository.
+2. Email templating concept credit goes to [Comment Reply Email Notification](https://wordpress.org/plugins/comment-reply-email-notification).
+3. Icon credit goes to [Flat Icons](https://www.flaticon.com/authors/flat-icons).
 
 == Installation ==
 
