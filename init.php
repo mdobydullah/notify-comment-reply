@@ -32,4 +32,5 @@
 include( plugin_dir_path( __FILE__ ) . 'includes/options.php');
 include( plugin_dir_path( __FILE__ ) . 'includes/settings_api.php');
 include( plugin_dir_path( __FILE__ ) . 'includes/functions.php');
-new MnpNcpSettings();
+
+new MnpNcrSettings();

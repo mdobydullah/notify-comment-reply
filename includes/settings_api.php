@@ -16,13 +16,13 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-if ( !class_exists('MnpNcpSettings' ) ):
-class MnpNcpSettings {
+if ( !class_exists('MnpNcrSettings' ) ):
+class MnpNcrSettings {
 
-    private $mnp_ncp_settings;
+    private $mnp_ncr_settings;
 
     function __construct() {
-        $this->mnp_ncp_settings = new MnpNcpSettingsAPI;
+        $this->mnp_ncr_settings = new MnpNcrSettingsAPI;
 
         add_action( 'admin_init', array($this, 'admin_init') );
         add_action( 'admin_menu', array($this, 'admin_menu') );
@@ -31,26 +31,26 @@ class MnpNcpSettings {
     function admin_init() {
 
         //set the settings
-        $this->mnp_ncp_settings->set_sections( $this->get_settings_sections() );
-        $this->mnp_ncp_settings->set_fields( $this->get_settings_fields() );
+        $this->mnp_ncr_settings->set_sections( $this->get_settings_sections() );
+        $this->mnp_ncr_settings->set_fields( $this->get_settings_fields() );
 
         //initialize settings
-        $this->mnp_ncp_settings->admin_init();
+        $this->mnp_ncr_settings->admin_init();
     }
 
     function admin_menu() {
-        add_submenu_page( 'options-general.php', 'Notify Comment Reply', 'Notify Comment Reply', 'manage_options', 'mnp_ncp_settings', array($this, 'mnp_notify_comment_reply_plugin_page'));
+        add_submenu_page( 'options-general.php', 'Notify Comment Reply', 'Notify Comment Reply', 'manage_options', 'mnp_ncr_settings', array($this, 'mnp_notify_comment_reply_plugin_page'));
     }
 
     function get_settings_sections() {
         $sections = array(
             array(
                 'id'    => 'mnp_ncr_basic',
-                'title' => __( 'Basic', 'mnp_ncp_settings' )
+                'title' => __( 'Basic', 'mnp_ncr_settings' )
             ),
             array(
                 'id'    => 'mnp_ncr_edit',
-                'title' => __( 'Comment Edit Notify', 'mnp_ncp_settings' )
+                'title' => __( 'Comment Edit Notify', 'mnp_ncr_settings' )
             ),
         );
         return $sections;
@@ -66,21 +66,21 @@ class MnpNcpSettings {
             'mnp_ncr_basic' => array(
                 array(
                     'name' => 'reply_subject',
-                    'label' => __( 'Reply Subject', 'mnp_ncp_settings' ),
+                    'label' => __( 'Reply Subject', 'mnp_ncr_settings' ),
                     'type' => 'text',
                     'default'  => 'New reply to your comment',
                     'sanitize_callback' => 'sanitize_text_field'
                 ),
                 array(
                     'name' => 'renotify_reply_subject',
-                    'label' => __( 'Re-Notify Subject', 'mnp_ncp_settings' ),
+                    'label' => __( 'Re-Notify Subject', 'mnp_ncr_settings' ),
                     'type' => 'text',
                     'default' => 'New reply to your comment - Renotify',
                     'sanitize_callback' => 'sanitize_text_field'
                 ),
                 array(
                     'name' => 'hide_renotify',
-                    'label' => __('Hide Re-Notify', 'mnp_ncp_settings'),
+                    'label' => __('Hide Re-Notify', 'mnp_ncr_settings'),
                     'type' => 'radio',
                     'default' => 'no',
                     'options' => array(
@@ -92,7 +92,7 @@ class MnpNcpSettings {
             'mnp_ncr_edit' => array(
                 array(
                     'name' => 'enable_edit_notify',
-                    'label' => __('Enable Edit Notify', 'mnp_ncp_settings'),
+                    'label' => __('Enable Edit Notify', 'mnp_ncr_settings'),
                     'type' => 'radio',
                     'default' => 'no',
                     'options' => array(
@@ -102,7 +102,7 @@ class MnpNcpSettings {
                 ),
                 array(
                     'name' => 'edit_notify_reply_subject',
-                    'label' => __( 'Edit Notify Subject', 'mnp_ncp_settings' ),
+                    'label' => __( 'Edit Notify Subject', 'mnp_ncr_settings' ),
                     'type' => 'text',
                     'default' => 'Reply has been modified',
                     'sanitize_callback' => 'sanitize_text_field'
@@ -120,8 +120,8 @@ class MnpNcpSettings {
 
         echo '<div class="wrap">';
 
-        $this->mnp_ncp_settings->show_navigation();
-        $this->mnp_ncp_settings->show_forms();
+        $this->mnp_ncr_settings->show_navigation();
+        $this->mnp_ncr_settings->show_forms();
 
         echo '</div>';
     }
