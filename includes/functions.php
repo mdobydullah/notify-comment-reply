@@ -29,9 +29,8 @@ function mnp_ncr_get_option( $option, $section, $default = '' ) {
 
     $options = get_option( $section );
 
-    if ( isset( $options[$option] ) ) {
+    if ( isset( $options[$option] ) )
         return $options[$option];
-    }
 
     return $default;
 }
@@ -50,25 +49,32 @@ function mnp_notify_comment_reply($commentId) {
 
     if ($comment->comment_approved == 1 && $comment->comment_parent > 0) {
         $parent = get_comment($comment->comment_parent);
-        $email  = $parent->comment_author_email;
+        $parent_author_email  = sanitize_email($parent->comment_author_email);
+        $child_author_email = sanitize_email($comment->comment_author_email);
 
-	    // don't send a notification if author & replier is same.
-        if ($email == $comment->comment_author_email) {
-            return false;
+        // check valid email
+        if (is_email($parent_author_email) && is_email($child_author_email)) {
+            // don't send a notification if author & replier is same.
+            if ($parent_author_email == $child_author_email)
+                return false;
+            
+            ob_start();
+            require mnp_notify_comment_reply_template_path('reply');
+            $body = ob_get_clean();
+
+            $title = 'New reply to your comment';
+
+            add_filter('wp_mail_content_type', 'mnp_notify_comment_reply_mail_content_type_filter');
+
+            wp_mail($parent_author_email, $title, $body);
+
+            remove_filter('wp_mail_content_type', 'mnp_notify_comment_reply_mail_content_type_filter');
         }
-
-        ob_start();
-	    require mnp_notify_comment_reply_template_path('reply');
-        $body = ob_get_clean();
-
-        $title = 'New reply to your comment';
-
-        add_filter('wp_mail_content_type', 'mnp_notify_comment_reply_mail_content_type_filter');
-
-        wp_mail($email, $title, $body);
-
-        remove_filter('wp_mail_content_type', 'mnp_notify_comment_reply_mail_content_type_filter');
+        else
+            return false;
     }
+    else
+        return false;
 }
 
 /**
@@ -82,25 +88,32 @@ if($mnp_ncr_enable_edit_notify == "yes") {
 
         if ($comment->comment_approved == 1 && $comment->comment_parent > 0) {
             $parent = get_comment($comment->comment_parent);
-            $email  = $parent->comment_author_email;
+            $parent_author_email  = sanitize_email($parent->comment_author_email);
+            $child_author_email = sanitize_email($comment->comment_author_email);
 
-            // don't send a notification if author & replier is same.
-            if ($email == $comment->comment_author_email) {
-                return false;
+            // check valid email
+            if (is_email($parent_author_email) && is_email($child_author_email)) {
+                // don't send a notification if author & replier is same.
+                if ($parent_author_email == $child_author_email)
+                    return false;
+
+                ob_start();
+                require mnp_notify_comment_reply_template_path('edit');
+                $body = ob_get_clean();
+
+                $title = 'Reply has been modified';
+
+                add_filter('wp_mail_content_type', 'mnp_notify_comment_reply_mail_content_type_filter');
+
+                wp_mail($parent_author_email, $title, $body);
+
+                remove_filter('wp_mail_content_type', 'mnp_notify_comment_reply_mail_content_type_filter');
             }
-
-            ob_start();
-            require mnp_notify_comment_reply_template_path('edit');
-            $body = ob_get_clean();
-
-            $title = 'Reply has been modified';
-
-            add_filter('wp_mail_content_type', 'mnp_notify_comment_reply_mail_content_type_filter');
-
-            wp_mail($email, $title, $body);
-
-            remove_filter('wp_mail_content_type', 'mnp_notify_comment_reply_mail_content_type_filter');
+            else
+                return false;
         }
+        else
+            return false;
     }
 }
 
@@ -138,37 +151,51 @@ if ($mnp_ncr_hide_renotify == "no") {
     add_action("init", "mnp_re_notify_to_comment_author");
 
     function mnp_re_notify_to_comment_author() {
-        if( isset( $_REQUEST["mnp-rnc-id"] ) ) {
+        if( isset( $_GET["mnp-rnc-id"] ) ) {
 
-        	$commentId = $_REQUEST["mnp-rnc-id"];
-        	$comment = get_comment( $commentId );
+            $commentId = sanitize_text_field($_GET["mnp-rnc-id"]);
+            $commentId = (int)$commentId;
+            $comment = get_comment( $commentId );
 
-    	    if ($comment->comment_approved == 1 && $comment->comment_parent > 0) {
-    	        $parent = get_comment($comment->comment_parent);
-    	        $email  = $parent->comment_author_email;
+            // check comment has data or not
+            if ($comment != null) {
+                // check comment is approved & has parent comment
+                if ($comment->comment_approved == 1 && $comment->comment_parent > 0) {
+                    $parent = get_comment($comment->comment_parent);
+                    $parent_author_email  = sanitize_email($parent->comment_author_email);
+                    $child_author_email = sanitize_email($comment->comment_author_email);
 
-    	        // don't send a notification if author & replier is same.
-    	        if ($email == $comment->comment_author_email) {
-    	            return false;
-    	        }
+                    // check valid email
+                    if (is_email($parent_author_email) && is_email($child_author_email)) {
+                        // don't send a notification if author & replier is same.
+                        if ($parent_author_email == $child_author_email)
+                            return false;
 
-    	        ob_start();
-    	        require mnp_notify_comment_reply_template_path('renotify');
-    	        $body = ob_get_clean();
+                        ob_start();
+                        require mnp_notify_comment_reply_template_path('renotify');
+                        $body = ob_get_clean();
 
-    	        $title = 'New reply to your comment';
+                        $title = 'New reply to your comment';
 
-    	        add_filter('wp_mail_content_type', 'mnp_notify_comment_reply_mail_content_type_filter');
+                        add_filter('wp_mail_content_type', 'mnp_notify_comment_reply_mail_content_type_filter');
 
-    	        wp_mail($email, $title, $body);
+                        wp_mail($parent_author_email, $title, $body);
 
-    	        remove_filter('wp_mail_content_type', 'mnp_notify_comment_reply_mail_content_type_filter');
-    	        ?>
-    	        <div class="notice notice-success is-dismissible">
-    	            <p><?php _e( '<strong>' . $parent->comment_author . '</strong> has been re-notified (' . $email . ')', 'notify-comment-reply' ); ?></p>
-    	        </div>
-    	    <?php
-    	    }
+                        remove_filter('wp_mail_content_type', 'mnp_notify_comment_reply_mail_content_type_filter');
+                        ?>
+                        <div class="notice notice-success is-dismissible">
+                            <p><?php _e( '<strong>' . $parent->comment_author . '</strong> has been re-notified (' . $parent_author_email . ')', 'notify-comment-reply' ); ?></p>
+                        </div>
+                    <?php
+                    }
+                    else
+                        return false;
+                }
+                else
+                    return false;
+            }
+            else
+                return false;
         }
     }
 }

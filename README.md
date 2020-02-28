@@ -25,7 +25,7 @@ The GPL2 License. Please see [license file](https://github.com/mdobydullah/notif
 
 ## Changelog
 ```
-v1.0.0 (Feb 27, 2020)
+v1.0 (Feb 27, 2020)
 ------------------------
 - [new] First release
 ```

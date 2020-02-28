@@ -4,7 +4,7 @@
  * Description: Notify the comment author via email when someone replies to his/her comment.
  * Author: Md Obydullah
  * Author URI: https://obydul.me
- * Version: 1.0.0
+ * Version: 1.0
  * License: GPLv2 or later
  * Text Domain: notify-comment-reply
  */
