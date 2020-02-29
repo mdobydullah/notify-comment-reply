@@ -3,7 +3,6 @@ Notify Comment Reply
 The plugin notifies the comment author via email when someone replies to his/her comment. The current features of this plugin:
 
 * Comment reply notification
-* Re-notify option
 * Notify on comment modification
 * Custom email templates
 
@@ -15,8 +14,8 @@ You're able to customize reply, re-notify and modification email templates. Copy
 
 Screenshots
 ----------------------
-![screenshot-1](https://user-images.githubusercontent.com/13184472/75423765-8ff72b80-5969-11ea-9013-8b3ac0488e6c.png)
-![screenshot-2](https://user-images.githubusercontent.com/13184472/75423759-8e2d6800-5969-11ea-9f05-65aa0919ca50.png)
+![screenshot-1](https://user-images.githubusercontent.com/13184472/75606819-e2c41500-5b1a-11ea-8c20-7e372124c036.png)
+![screenshot-2](https://user-images.githubusercontent.com/13184472/75606820-e48dd880-5b1a-11ea-8038-109a7d3034ad.png)
 ![screenshot-3](https://user-images.githubusercontent.com/13184472/75423763-8ff72b80-5969-11ea-9b98-3414e83c9bd8.png)
 
 ## License

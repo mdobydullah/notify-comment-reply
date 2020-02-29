@@ -14,7 +14,6 @@ Notify the comment author via email when someone replies to his/her comment.
 The plugin notifies the comment author via email when someone replies to his/her comment. The current features of this plugin:
 
 * Comment reply notification
-* Re-notify option
 * Notify on comment modification
 * Custom email templates
 
