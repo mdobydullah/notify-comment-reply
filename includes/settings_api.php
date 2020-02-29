@@ -65,28 +65,21 @@ class MnpNcrSettings {
         $settings_fields = array(
             'mnp_ncr_basic' => array(
                 array(
-                    'name' => 'reply_subject',
-                    'label' => __( 'Reply Subject', 'mnp_ncr_settings' ),
-                    'type' => 'text',
-                    'default'  => 'New reply to your comment',
-                    'sanitize_callback' => 'sanitize_text_field'
-                ),
-                array(
-                    'name' => 'renotify_reply_subject',
-                    'label' => __( 'Re-Notify Subject', 'mnp_ncr_settings' ),
-                    'type' => 'text',
-                    'default' => 'New reply to your comment - Renotify',
-                    'sanitize_callback' => 'sanitize_text_field'
-                ),
-                array(
-                    'name' => 'hide_renotify',
-                    'label' => __('Hide Re-Notify', 'mnp_ncr_settings'),
+                    'name' => 'disable_notify',
+                    'label' => __('Disable Notify', 'mnp_ncr_settings'),
                     'type' => 'radio',
                     'default' => 'no',
                     'options' => array(
                         'yes' => 'Yes',
                         'no' => 'No'
                     )
+                ),
+                array(
+                    'name' => 'reply_subject',
+                    'label' => __( 'Reply Subject', 'mnp_ncr_settings' ),
+                    'type' => 'text',
+                    'default'  => 'New reply to your comment',
+                    'sanitize_callback' => 'sanitize_text_field'
                 ),
             ),
             'mnp_ncr_edit' => array(

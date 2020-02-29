@@ -36,51 +36,53 @@ function mnp_ncr_get_option( $option, $section, $default = '' ) {
 }
 
 // get plugin setiings
-$mnp_ncr_hide_renotify = mnp_ncr_get_option( 'hide_renotify', 'mnp_ncr_basic', 'no' );
+$mnp_ncr_disable_notify = mnp_ncr_get_option( 'disable_notify', 'mnp_ncr_basic', 'no' );
 $mnp_ncr_enable_edit_notify = mnp_ncr_get_option( 'enable_edit_notify', 'mnp_ncr_edit', 'no' );
 
 /**
  * notify on reply
  */
-add_action('comment_post', 'mnp_notify_comment_reply');
+if($mnp_ncr_disable_notify == "no") {
+    add_action('comment_post', 'mnp_notify_comment_reply');
 
-function mnp_notify_comment_reply($commentId) {
-    $comment = get_comment( $commentId );
+    function mnp_notify_comment_reply($commentId) {
+        $comment = get_comment( $commentId );
 
-    if ($comment->comment_approved == 1 && $comment->comment_parent > 0) {
-        $parent = get_comment($comment->comment_parent);
-        $parent_author_email  = sanitize_email($parent->comment_author_email);
-        $child_author_email = sanitize_email($comment->comment_author_email);
+        if ($comment->comment_approved == 1 && $comment->comment_parent > 0) {
+            $parent = get_comment($comment->comment_parent);
+            $parent_author_email  = sanitize_email($parent->comment_author_email);
+            $child_author_email = sanitize_email($comment->comment_author_email);
 
-        // check valid email
-        if (is_email($parent_author_email) && is_email($child_author_email)) {
-            // don't send a notification if author & replier is same.
-            if ($parent_author_email == $child_author_email)
+            // check valid email
+            if (is_email($parent_author_email) && is_email($child_author_email)) {
+                // don't send a notification if author & replier is same.
+                if ($parent_author_email == $child_author_email)
+                    return false;
+                
+                ob_start();
+                require mnp_notify_comment_reply_template_path('reply');
+                $body = ob_get_clean();
+
+                $subject = mnp_ncr_get_option( 'reply_subject', 'mnp_ncr_basic', 'New reply to your comment' );
+
+                add_filter('wp_mail_content_type', 'mnp_notify_comment_reply_mail_content_type_filter');
+
+                wp_mail($parent_author_email, $subject, $body);
+
+                remove_filter('wp_mail_content_type', 'mnp_notify_comment_reply_mail_content_type_filter');
+            }
+            else
                 return false;
-            
-            ob_start();
-            require mnp_notify_comment_reply_template_path('reply');
-            $body = ob_get_clean();
-
-            $subject = mnp_ncr_get_option( 'reply_subject', 'mnp_ncr_basic', 'New reply to your comment' );
-
-            add_filter('wp_mail_content_type', 'mnp_notify_comment_reply_mail_content_type_filter');
-
-            wp_mail($parent_author_email, $subject, $body);
-
-            remove_filter('wp_mail_content_type', 'mnp_notify_comment_reply_mail_content_type_filter');
         }
         else
             return false;
     }
-    else
-        return false;
 }
 
 /**
  * notify on modification
  */
-if($mnp_ncr_enable_edit_notify == "yes") {
+if($mnp_ncr_disable_notify == "no" && $mnp_ncr_enable_edit_notify == "yes") {
     add_action('edit_comment', 'mnp_notify_comment_reply_edit_notify');
 
     function mnp_notify_comment_reply_edit_notify($commentId) {
@@ -114,128 +116,6 @@ if($mnp_ncr_enable_edit_notify == "yes") {
         }
         else
             return false;
-    }
-}
-
-/**
- * check re-notify option is enable or not
- */
-if( $mnp_ncr_hide_renotify == "no") {
-    add_filter( 'manage_edit-comments_columns', 'mnp_comment_reply_add_comments_columns' );
-    add_action( 'manage_comments_custom_column', 'mnp_comment_reply_add_comment_columns_content', 10, 2 );
-    add_action("init", "mnp_re_notify_to_comment_author");
-    add_action("init", "mnp_re_notify_to_comment_author_response");
-}
-
-/**
- * add 'Email Notify' column to comments page (admin)
- */
-function mnp_comment_reply_add_comments_columns( $mnp_comment_columns ) {
-    // column name:
-    $mnp_comment_column_items = array(
-        'm_parent_id' => 'Email Notify'
-    );
-    $mnp_comment_columns = array_slice( $mnp_comment_columns, 0, 3, true ) + $mnp_comment_column_items + array_slice( $mnp_comment_columns, 3, NULL, true );
- 
-    // return the result
-    return $mnp_comment_columns;
-}
-
-/**
- * the 'Email Notify' column content
- */
-function mnp_comment_reply_add_comment_columns_content( $column, $comment_ID ) {
-    global $comment;
-    {
-        if($comment->comment_parent > 0) {
-            $url = add_query_arg(
-                [
-                    'action' => 'mnp_ncr_renotify',
-                    'comment_id'   => $comment_ID,
-                    'ncr_nonce'  => wp_create_nonce('mnp_ncr_renotify'),
-                ],
-                admin_url('edit-comments.php')
-            );
-            echo ' <a href="' . esc_url($url) . '">' . esc_html__('Re-Notify', 'notify-comment-reply') . '</a>';
-        }
-    }
-}
-
-/**
- * re-notify email
- */
-function mnp_re_notify_to_comment_author() {
-    if (
-        isset($_GET['action']) &&
-        isset($_GET['ncr_nonce']) &&
-        $_GET['action'] === 'mnp_ncr_renotify' &&
-        wp_verify_nonce($_GET['ncr_nonce'], 'mnp_ncr_renotify')
-    ) {
-        // verify we have a comment id
-        $commentId = (isset($_GET['comment_id'])) ? (int) ($_GET['comment_id']) : (null);
- 
-        // verify there is a comment with the id
-        $comment = get_comment( $commentId );
-        if ($comment == null)
-            return false;
- 
-        // check comment is approved & has parent comment
-        if ($comment->comment_approved == 1 && $comment->comment_parent > 0) {
-            $parent = get_comment($comment->comment_parent);
-            $parent_author_email  = sanitize_email($parent->comment_author_email);
-            $child_author_email = sanitize_email($comment->comment_author_email);
-
-            // check valid email
-            if (is_email($parent_author_email) && is_email($child_author_email)) {
-                // don't send a notification if author & replier is same.
-                if ($parent_author_email == $child_author_email)
-                    return false;
-
-                ob_start();
-                require mnp_notify_comment_reply_template_path('renotify');
-                $body = ob_get_clean();
-
-                $subject = mnp_ncr_get_option( 'renotify_reply_subject', 'mnp_ncr_basic', 'New reply to your comment - Renotify' );
-
-                add_filter('wp_mail_content_type', 'mnp_notify_comment_reply_mail_content_type_filter');
-
-                wp_mail($parent_author_email, $subject, $body);
-
-                remove_filter('wp_mail_content_type', 'mnp_notify_comment_reply_mail_content_type_filter');
-
-                // response
-                $redirect_with_data = add_query_arg(
-                    [
-                        'renotify'  => true,
-                        'ncrs_nonce'  => wp_create_nonce('mnp_ncr_renotify_success'),
-                    ],
-                    admin_url('edit-comments.php')
-                );
-
-                wp_redirect( $redirect_with_data );
-                exit;
-            }
-            else
-                return false;
-        }
-        else
-            return false;
-    }
-}
-
-/**
- * re-notify success response
- */
-function mnp_re_notify_to_comment_author_response() {
-    if (
-        isset($_GET['ncrs_nonce']) &&
-        isset($_GET['renotify']) &&
-        wp_verify_nonce($_GET['ncrs_nonce'], 'mnp_ncr_renotify_success')
-    ) { ?>
-        <div class="notice notice-success is-dismissible">
-            <p><?php _e( 'The comment author has been re-notified', 'notify-comment-reply' ); ?></p>
-        </div>
-        <?php
     }
 }
 
