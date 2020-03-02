@@ -44,4 +44,4 @@ How to install the plugin and get it working.
 == Changelog ==
 
 = 1.0 =
-Release Date: Feb 27, 2020
+Release Date: Mar 3, 2020
